@@ -1,5 +1,5 @@
 ## RFI-Inpainting-with-DSS-Layers
-Will update this read me in due time. Meanwhile, here is a quick description of the project.
+Will update this README in due time. Meanwhile, here is a quick description of the project.
 ### Tentative project description
 One of the main challenges in measuring radio photons using ground instruments is the frequent data flagging
 found due to radio frequency interference (RFI). PhD candidate Michael Pagano has been working on a
