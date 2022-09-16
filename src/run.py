@@ -8,11 +8,11 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from loss import custom_loss
 
 # Generating sample data to test the network
-X_masked_validation = np.random.normal(0, 1, size = (5, 512, 512, 5)) # data validation
+X_masked_validation = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data validation
 
-X_masked = np.random.normal(0, 1, size = (5, 512, 512, 5)) # data
+X_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data
 
-Y_not_masked = np.random.normal(0, 1, size = (5, 512, 512, 2)) # labels
+Y_not_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # labels
 
 # Creating path where networl progress is saved
 checkpoint_path = '../checkpoints/latest.hdf5'
