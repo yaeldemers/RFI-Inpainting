@@ -14,7 +14,7 @@ X_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data
 
 Y_not_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # labels
 
-# Creating path where networl progress is saved
+# Creating path where network progress is saved
 checkpoint_path = '../checkpoints/latest.hdf5'
 
 # Creating an instance of the loss class
@@ -30,7 +30,7 @@ modelcheckpoint = ModelCheckpoint(save_best_only = True, save_weights_only = Tru
 
 # Running the network
 #CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 80, callbacks = [callback_list], validation_split = 0.1)
-CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 2, validation_split = 0.1)
+CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 8, validation_split = 0.1)
 
 print('Done, moving to predictions', flush = True)
 
