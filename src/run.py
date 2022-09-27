@@ -8,27 +8,28 @@ from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from loss import custom_loss
 
 # Generating sample data to test the network
-
+"""
 X_masked_validation = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data validation
 
 X_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data
 
 Y_not_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # labels
-
 """
+
 # Fetching data from cluster
-X_masked = np.load('../../../projects/def-acliu/DSSdata/training_data.npy') # data
+X_masked = np.load('/home/ydemers/projects/def-acliu/DSSdata/training_data.npy') # data
 
-Y_not_masked = np.load('../../../projects/def-acliu/DSSdata/training_labels.npy') # labels
-"""
+Y_not_masked = np.load('/home/ydemers/projects/def-acliu/DSSdata/training_labels.npy') # labels
+
 
 # Creating path where network progress is saved
-checkpoint_path = '../checkpoints/latest.hdf5'
+checkpoint_path = '/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/checkpoints/latest.hdf5'
+runs_path = '/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/log.csv'
 
 # Callback setup
-#custom_callbacks = CustomCallbacks()
+#custom_callbacks = CustomCallbacks() #TODO ask Michael about those 
 modelcheckpoint   = ModelCheckpoint(save_best_only=True, save_weights_only = True,  verbose = 1, filepath = checkpoint_path, monitor = 'val_loss'  )
-csvlogger = CSVLogger( filename = '../run/log.csv', separator = ',' , append = False )
+csvlogger = CSVLogger( filename = runs_path, separator = ',' , append = False )
 callback_list  = [modelcheckpoint , csvlogger]
 
 # Creating an instance of the loss class
@@ -49,4 +50,4 @@ CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 2, callbacks 
 print('Done, moving to predictions', flush = True)
 
 # Making predictions
-predictions = CNN_obj.model.predict(X_masked_validation[:, :, :, :])
+#predictions = CNN_obj.model.predict(X_masked_validation[:, :, :, :]) #TODO ask Michael about those
