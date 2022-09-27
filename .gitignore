@@ -1,0 +1,6 @@
+# Ignore all
+run/**
+checkpoints/**
+src/__pycache__
+src/tensorflow
+src/*.out

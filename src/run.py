@@ -4,18 +4,32 @@ import CNN_model as CNN
 from datetime import date
 today = date.today()
 
-from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from loss import custom_loss
 
 # Generating sample data to test the network
+
 X_masked_validation = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data validation
 
 X_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data
 
 Y_not_masked = np.random.normal(0, 1, size = (5, 512, 512, 3)) # labels
 
+"""
+# Fetching data from cluster
+X_masked = np.load('../../../projects/def-acliu/DSSdata/training_data.npy') # data
+
+Y_not_masked = np.load('../../../projects/def-acliu/DSSdata/training_labels.npy') # labels
+"""
+
 # Creating path where network progress is saved
 checkpoint_path = '../checkpoints/latest.hdf5'
+
+# Callback setup
+#custom_callbacks = CustomCallbacks()
+modelcheckpoint   = ModelCheckpoint(save_best_only=True, save_weights_only = True,  verbose = 1, filepath = checkpoint_path, monitor = 'val_loss'  )
+csvlogger = CSVLogger( filename = '../run/log.csv', separator = ',' , append = False )
+callback_list  = [modelcheckpoint , csvlogger]
 
 # Creating an instance of the loss class
 loss = custom_loss()  #the loss needs to know the shape of the batch size too
@@ -24,13 +38,13 @@ loss = custom_loss()  #the loss needs to know the shape of the batch size too
 CNN_obj = CNN.Unet(X_masked[1,:,:].shape, loss, checkpoint_path)
 
 # Debugging, testing and evaluation of network (i.e. is the network good?)
-CNN.model.summary() 
+#CNN.model.summary() 
 
 modelcheckpoint = ModelCheckpoint(save_best_only = True, save_weights_only = True, verbose = 1, filepath = checkpoint_path, monitor = 'val_loss')
 
 # Running the network
-#CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 80, callbacks = [callback_list], validation_split = 0.1)
-CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 8, validation_split = 0.1)
+CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 2, callbacks = [callback_list], validation_split = 0.1)
+#CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 8, validation_split = 0.1)
 
 print('Done, moving to predictions', flush = True)
 
