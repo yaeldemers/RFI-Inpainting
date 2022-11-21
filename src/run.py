@@ -44,7 +44,7 @@ CNN_obj = CNN.Unet(X_masked[1,:,:].shape, loss, checkpoint_path)
 modelcheckpoint = ModelCheckpoint(save_best_only = True, save_weights_only = True, verbose = 1, filepath = checkpoint_path, monitor = 'val_loss')
 
 # Running the network
-CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 2, callbacks = [callback_list], validation_split = 0.1)
+CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 12, callbacks = [callback_list], validation_split = 0.1)
 #CNN_obj.model.fit(X_masked, Y_not_masked, batch_size = 5, epochs = 8, validation_split = 0.1)
 
 print('Done, moving to predictions', flush = True)
