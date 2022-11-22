@@ -1,6 +1,7 @@
 # Ignore all
-run/**
+data/**
 checkpoints/**
 src/__pycache__
 src/tensorflow
 src/*.out
+runs/log.csv

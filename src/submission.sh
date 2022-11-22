@@ -7,4 +7,4 @@
 #SBATCH --mail-user=<yael.demers@mail.mcgill.ca>
 #SBATCH --mail-type=ALL 
 
-python dss_run.py 
+python dss_run_prime.py 

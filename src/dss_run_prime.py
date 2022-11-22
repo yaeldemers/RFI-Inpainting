@@ -10,6 +10,8 @@ from keras import backend
 from tensorflow.keras.optimizers import *
 from datetime import date
 
+import matplotlib.pyplot as plt
+
 today = date.today()
 
 
@@ -32,6 +34,8 @@ class custom_loss:
             '''
             #mask_array = Y_true[:,:,:,2]
             #mask_array = tf.ones_like(Y_true[:,:,:,2]) - Y_true[:,:,:,2]
+
+            """
             mask_array = Y_true[:,:,:,2]
 
             Y_pred_real = tf.math.multiply(tf.cast(Y_pred[:,:,:,0] , tf.float64) , tf.cast(mask_array[:,:,:], tf.float64))
@@ -50,6 +54,22 @@ class custom_loss:
             chi2 = tf.math.conj(chi) * chi
             
             return tf.math.real(tf.math.reduce_sum(chi2))
+            """
+            mask_array = Y_true[:,:,:,2]
+
+            Y_pred_real = tf.math.multiply(tf.cast(Y_pred[:,:,:,0], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
+            Y_true_real = tf.math.multiply(tf.cast(Y_true[:,:,:,0], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
+            
+            Y_pred_imag = tf.math.multiply(tf.cast(Y_pred[:,:,:,1], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
+            Y_true_imag = tf.math.multiply(tf.cast(Y_true[:,:,:,1], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
+            
+            ground_truth_reconstructed = tf.complex(Y_true_real, Y_true_imag)
+            predictions_reconstructed = tf.complex(Y_pred_real, Y_pred_imag)
+            
+            abs_difference = (tf.math.abs(ground_truth_reconstructed - predictions_reconstructed))
+            loss_val = tf.math.real(tf.math.reduce_sum(abs_difference))
+
+            return loss_val
 
         return masked_loss
     
@@ -83,8 +103,8 @@ class DSS(keras.layers.Layer):
 #TODO: consider weights
 
 #--------- Getting input, noise for now --------#
-input_a = Input(np.random.normal(0, 1, size = (512, 512, 3)).shape, name="input_a")
-input_b = Input(np.random.normal(0, 1, size = (512, 512, 3)).shape, name="input_b")
+input_a = Input(np.random.normal(0, 1, size = (128, 128, 3)).shape, name="input_a")
+input_b = Input(np.random.normal(0, 1, size = (128, 128, 3)).shape, name="input_b")
 
 #--------- Initial step of the U-pattern -------#
 dss_1 = DSS(filters=64, name="dss_1-1")([input_a, input_b])
@@ -186,11 +206,20 @@ CNN._name = "U-NET-V0.6"
 
 
 # Generating sample data to test the network
-x_test = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data validation
+#x_test = np.load('/home/ydemers/projects/def-acliu/DSSdata/training_data.npy') # data validation
 
-x_train = np.random.normal(0, 1, size = (5, 512, 512, 3)) # data
+#x_train = np.load('/home/ydemers/projects/def-acliu/DSSdata/training_data.npy') # data
+x_train = np.load('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/data/sample_data.npy') # data
 
-y_train = np.random.normal(0, 1, size = (5, 512, 512, 3)) # labels
+
+# Normalising the data
+x_train = x_train/np.std(x_train)
+x_train = x_train-np.mean(x_train)
+
+y_train = x_train # labels
+
+# Applying masks
+x_train[:,:,80:90,0:1] = 0
 
 # Creating path where networl progress is saved
 checkpoint_path = '../latest.hdf5'
@@ -217,9 +246,45 @@ print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('
 CNN.compile(optimizer = Adam(learning_rate = 1e-4), loss = masked_loss , metrics = [ masked_loss ])
 
 # fitting the model
-CNN.fit([x_train, x_train], [y_train, y_train], batch_size = 5, epochs = 24, callbacks = [callback_list], validation_split = 0.1)
+CNN.fit([x_train, x_train], [y_train, y_train], batch_size = 10, epochs = 80, callbacks = [callback_list], validation_split = 0.2)
 
 print('Done, moving to predictions', flush = True)
 
 # Making predictions
-predictions = CNN.predict([x_test[:, :, :, :], x_test[:, :, :, :]])
+predictions = CNN.predict([x_train[:, :, :, :], x_train[:, :, :, :]])
+
+plt.imshow(y_train[0,:,:,0])
+plt.title("Simulated data")
+plt.colorbar()
+plt.savefig('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/figures/simulated_img.png')
+plt.show()
+plt.close()
+
+plt.imshow(predictions[0][0,:,:,0], vmax=100)
+plt.title("Prediction a - real")
+plt.colorbar()
+plt.savefig('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/figures/pred_a_real.png')
+plt.show()
+plt.close()
+
+
+plt.imshow(predictions[0][0,:,:,1], vmax=100)
+plt.title("Prediction a - imaginary")
+plt.colorbar()
+plt.savefig('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/figures/pred_a_imaginary.png')
+plt.show()
+plt.close()
+
+plt.imshow(predictions[1][0,:,:,0], vmax=100)
+plt.title("Prediction b - real")
+plt.colorbar()
+plt.savefig('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/figures/pred_b_real.png')
+plt.show()
+plt.close()
+
+plt.imshow(predictions[1][0,:,:,1], vmax=100)
+plt.title("Prediction b - imaginary")
+plt.colorbar()
+plt.savefig('/home/ydemers/scratch/RFI-Inpainting-with-DSS-Layers/runs/figures/pred_b_imaginary.png')
+plt.show()
+plt.close()
