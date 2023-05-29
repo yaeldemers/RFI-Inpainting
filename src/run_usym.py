@@ -3,7 +3,7 @@ import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
-from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Add
+from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Add, Dense
 from tensorflow import keras
 from tensorflow.keras.optimizers import *
 from dss_layer import DSS
@@ -20,6 +20,7 @@ pool_1a = MaxPooling2D((2,2), name="maxpool_1a")(dss_1[0])
 pool_1a = Dropout(0.5, name="dropout_1a")(pool_1a)
 pool_1b = MaxPooling2D((2,2), name="maxpool_1b")(dss_1[1])
 pool_1b = Dropout(0.5, name="dropout_1b")(pool_1b)
+
 
 #--------- drop a step in the U-pattern --------#
 dss_2 = DSS(filters=128, name="dss_2-1")([pool_1a, pool_1b])
@@ -100,9 +101,14 @@ dss_up_1 = DSS(filters=64, name="updss_1-1")([uconv_1a, uconv_1b])
 
 
 #-------- reshaping the data to fit inputs ------#
-output_a = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="output_a")(dss_up_1[0])
-output_b = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="output_b")(dss_up_1[1])
+output_a = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="last_conv_a")(dss_up_1[0])
+output_b = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="last_conv_b")(dss_up_1[1])
 
+#-------- dense layers to allow neg values ------#
+output_a = Dense(64, activation='relu', name="dense_a")(output_a)
+output_a = Dense(2, name="output_a")(output_a)
+output_b = Dense(64, activation='relu', name="dense_b")(output_b)
+output_b = Dense(2, name="output_b")(output_b)
 
 CNN = Model([input_a, input_b], [output_a, output_b])
 
@@ -123,7 +129,8 @@ image_train = (image_train - mean) / std
 label_train = image_train # labels
 
 # Ground truth
-prediction_plot(image_train[0,:,:,0], "Simulated data (ground truth)", '../run/figures/ground_truth.png')
+prediction_plot(image_train[0,:,:,0], "Ground truth - Real", '../run/figures/ground_truth_real.png')
+prediction_plot(image_train[0,:,:,1], "Ground truth - Imaginary", '../run/figures/ground_truth_imaginary.png')
 
 # Applying masks
 image_train[:,:,80:90,0:1] = 0
@@ -143,16 +150,16 @@ masked_loss = custom_loss().wrapper()
 CNN.compile(optimizer = Adam(learning_rate = 1e-4), loss = masked_loss , metrics = [ masked_loss ])
 
 # Fitting the model
-CNN.fit([image_train, image_train], [label_train, label_train], batch_size = 5, epochs = 12, callbacks = [callback_list], validation_split = 0.2)
+CNN.fit([image_train, image_train], [label_train, label_train], batch_size = 4, epochs = 8, callbacks = [callback_list], validation_split = 0.2)
 
 print('Done, moving to predictions', flush = True)
 
 # Making predictions
 predictions = CNN.predict([image_train[:, :, :], image_train[:, :, :]])
 
-prediction_plot(predictions[0][0,:,:,0], 'U-SYM A (real)', '../run/figures/usym_a_real.png', vmax=25)
-prediction_plot(predictions[0][0,:,:,1], 'U-SYM A (imaginary)', '../run/figures/usym_a_imaginary.png', vmax=25)
-prediction_plot(predictions[1][0,:,:,0], 'U-SYM B (real)', '../run/figures/usym_b_real.png', vmax=25)
-prediction_plot(predictions[1][0,:,:,1], 'U-SYM B (imaginary)', '../run/figures/usym_b_imaginary.png', vmax=25)
+prediction_plot(predictions[0][0,:,:,0], 'U-SYM A (real)', '../run/figures/usym_a_real.png')
+prediction_plot(predictions[0][0,:,:,1], 'U-SYM A (imaginary)', '../run/figures/usym_a_imaginary.png')
+prediction_plot(predictions[1][0,:,:,0], 'U-SYM B (real)', '../run/figures/usym_b_real.png')
+prediction_plot(predictions[1][0,:,:,1], 'U-SYM B (imaginary)', '../run/figures/usym_b_imaginary.png')
 
 learning_plot('../run/log_usym.csv', "U-SYM (learning curves)", '../run/figures/usym_learning.png', end=7)

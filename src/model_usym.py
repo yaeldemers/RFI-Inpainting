@@ -1,7 +1,7 @@
 from tensorflow.keras.optimizers import *
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
-from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Conv2DTranspose, concatenate
+from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Conv2DTranspose, concatenate, Dense
 from dss_layer import DSS
 
 class USYM: 
@@ -99,6 +99,12 @@ class USYM:
         #-------- reshaping the data to fit inputs ------#
         output_a = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="output_a")(dss_up_1[0])
         output_b = Conv2D(3, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal', name="output_b")(dss_up_1[1])
+
+        #-------- dense layers to allow neg values ------#
+        output_a = Dense(64, activation='relu')(output_a)
+        output_a = Dense(2)(output_a)
+        output_b = Dense(64, activation='relu')(output_b)
+        output_b = Dense(2)(output_b)
         
         
         self.model = Model(inputs, [output_a, output_b])
