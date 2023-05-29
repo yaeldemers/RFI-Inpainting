@@ -65,7 +65,6 @@ class DeepCNN(Sequential):
         self.model.compile(loss = 'binary_crossentropy', optimizer = self.optimizer, metrics = ['accuracy'])
         
         self.model.build()
-    
 
 class Unet:
     '''
@@ -81,6 +80,8 @@ class Unet:
         # we need the loss for the compile step, this is just the object though, we'll initialize the
         # actual loss function (which is wrapped) later on
         masked_loss  = loss_class.wrapper()
+        # TODO fix above
+        #masked_loss = loss_class
 
         self.weights_dir = weights_dir
 
@@ -178,7 +179,7 @@ class Unet:
                 pass
                 print('No weights to load' , flush = True)
             #self.model.load_weights(self.weights)​
-        self.model.compile(optimizer = Adam(lr = 1e-4), loss = masked_loss , metrics = [ masked_loss ])
+        self.model.compile(optimizer = Adam(learning_rate = 1e-4), loss = masked_loss , metrics = [ masked_loss ])
 
         #self.model.summary()​​​​
 
