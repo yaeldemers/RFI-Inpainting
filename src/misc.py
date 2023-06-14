@@ -63,12 +63,12 @@ def splice_data(size, location, stats_data):
 
             data_out.append(curr)
             
-            plt.figure(figsize = (10,10))
-            plt.imshow(curr, origin = 'lower')
-            plt.colorbar()
+            #plt.figure(figsize = (10,10))
+            #plt.imshow(curr, origin = 'lower')
+            #plt.colorbar()
             
             
-    print(data_out)
+    #print(data_out)
             
     np.save(location, data_out)
 
