@@ -43,11 +43,11 @@ def normalize(data):
 def unnormalize(data, mean, std):
     return (data*std+mean) 
 
-def splice_data(size, location, stats_data):
+def splice_data(size, location_from, location_to):
     count_y = int(np.floor(1920/size))
     count_x = int(np.floor(1024/size))
     
-    data_in = np.load('../data/raw/data1.npy')[:size*count_y,:size*count_x]
+    data_in = np.load(location_from)[:size*count_y,:size*count_x]
     data_out = []
     
     for i in range(count_x):
@@ -70,7 +70,7 @@ def splice_data(size, location, stats_data):
             
     #print(data_out)
             
-    np.save(location, data_out)
+    np.save(location_to, data_out)
 
 class custom_loss:
     def wrapper(self):
@@ -188,3 +188,5 @@ def split_dataset(masked_data, unmasked_data, masks):
     x_test, y_test, masks_test = masked_data[sub_indices[2]], unmasked_data[sub_indices[2]], masks[sub_indices[2]]
     
     return x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices
+
+splice_data(256, '../data/hera_sample_data.npy', '../data/hera_256_data.npy')

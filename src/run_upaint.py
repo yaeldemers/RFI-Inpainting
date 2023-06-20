@@ -4,7 +4,7 @@ import model_upaint as UPAINT
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 import misc as misc
 
-data = np.load('../data/256x256/sample_data1.npy')  
+data = np.load('../data/hera_256_data.npy')  
 
 data_masked = data
 means_real, stds_real = np.zeros(len(data)), np.zeros(len(data)) 
@@ -55,6 +55,6 @@ for i in range(len(data[:4])):
     predictions[i,:,:,0] = misc.unnormalize(predictions[i,:,:,0], means_real[i], stds_real[i])
     predictions[i,:,:,1] = misc.unnormalize(predictions[i,:,:,1], means_im[i], stds_im[i])
 
-np.savez("../run/data.npz", predictions=predictions, ground_truths=data_not_masked, masks=data_not_masked[:,:,:,2]) 
+np.savez("../run/data_out.npz", predictions=predictions, ground_truths=data_not_masked, masks=data_not_masked[:,:,:,2]) 
 
 misc.learning_plot('../run/log_upaint.csv', "U-Paint (learning curves)", '../run/figures/upaint_learning.png')
