@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 import misc as misc
 
+np.random.seed(0);
+
 data = np.load('../data/local_hera_256_data.npy') 
 
 wd = '/home/ydemers/projects/def-acliu/ydemers/RFI-Inpainting'
@@ -33,7 +35,7 @@ for i in range(len(permutations)):
     checkpoint_path = wd+'/checkpoints/latest_upaint.hdf5'
 
     #TODO: Check whether or not I am replacing or appending the checkpoints
-    modelcheckpoint   = ModelCheckpoint(save_best_only=True, save_weights_only = True,  verbose = 1, filepath = checkpoint_path, monitor = 'val_loss')
+    modelcheckpoint = ModelCheckpoint(save_best_only=True, save_weights_only = True,  verbose = 1, filepath = checkpoint_path, monitor = 'val_loss')
     csvlogger = CSVLogger( filename = wd+'/run/log_upaint.csv', separator = ',' , append = False )
     callback_list  = [modelcheckpoint , csvlogger]
 
@@ -44,13 +46,13 @@ for i in range(len(permutations)):
     UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
 
     # Running the network
-    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 96, callbacks = [callback_list], validation_data=(x_val, y_val))
+    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 192, callbacks = [callback_list], validation_data=(x_val, y_val))
     print('Done, moving to predictions', flush = True)
 
     # Making predictions
     predictions = UPAINT_obj.model.predict(x_test[:, :, :, :])
 
-    np.savez(wd+"/run/data_out_remote_3.npz", predictions=predictions, ground_truths=y_test, masks=masks_test) 
+    np.savez(wd+"/run/data_out_remote_6.npz", predictions=predictions, ground_truths=y_test, masks=masks_test) 
 
     plt.imshow(x_test[0,:,:,0], origin = 'lower')
     plt.title('Flagged')

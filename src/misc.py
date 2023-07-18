@@ -19,7 +19,7 @@ def learning_plot(logs, title, save_at, start=0, end=0):
 
     # converting column data to list
     loss = data['loss'].tolist()
-    val_loss = data['val_loss'].tolist()
+    val_loss = data['val_loss'].tolist()[1:]
     
     if end==0:
         end=len(loss)
@@ -198,4 +198,4 @@ def split_dataset(masked_data, unmasked_data, masks, indices=[]):
     
     return x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices
 
-splice_data(256, '../data/hera_sample_data.npy', '../data/hera_256_data.npy')
+#splice_data(256, '../data/hera_sample_data.npy', '../data/hera_256_data.npy')

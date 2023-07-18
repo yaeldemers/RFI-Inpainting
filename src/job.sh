@@ -8,8 +8,12 @@
 #SBATCH --mail-user=yael.demers@mail.mcgill.ca
 #SBATCH --mail-type=ALL
 
+echo "Removing outdated checkpoints"
 rm ../checkpoints/*
 
+echo "Setting up environment"
 module load cuda cudnn 
 source ../../tensorflow/bin/activate
+
+echo "Running 'run_upaint_v2.py'"
 python run_upaint_v2.py
