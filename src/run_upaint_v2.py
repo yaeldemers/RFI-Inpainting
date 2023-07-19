@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 import misc as misc
 
+import tensorflow as tf
+from tensorflow.keras.models import load_model
+
 np.random.seed(0);
 
 data = np.load('../data/local_hera_256_data.npy') 
@@ -32,7 +35,7 @@ for i in range(len(permutations)):
     #    np.savetxt(f, indices.reshape(1, -1), fmt='%i', delimiter=",")
 
     # Creating path where network progress is saved
-    checkpoint_path = wd+'/checkpoints/latest_upaint.hdf5'
+    checkpoint_path = wd+'/checkpoints/test_upaint.hdf5'
 
     #TODO: Check whether or not I am replacing or appending the checkpoints
     modelcheckpoint = ModelCheckpoint(save_best_only=True, save_weights_only = True,  verbose = 1, filepath = checkpoint_path, monitor = 'val_loss')
@@ -45,28 +48,32 @@ for i in range(len(permutations)):
     # Creating a model with the CNN
     UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
 
+    UPAINT_obj.model.load_weights(checkpoint_path)
+
     # Running the network
-    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 192, callbacks = [callback_list], validation_data=(x_val, y_val))
+    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
     print('Done, moving to predictions', flush = True)
 
     # Making predictions
+    """
+    ##############################
+    model_path = wd+'/checkpoints/test_upaint.hdf5'
+
+    #testing to see if model can predict the same things as local
+    model = UPAINT.Unet(data[1,:,:].shape, loss, model_path)
+    model.model.load_weights(model_path)    
+    predictions = model.model.predict(x_test[:, :, :, :])
+    """
+    ##############################
+
     predictions = UPAINT_obj.model.predict(x_test[:, :, :, :])
 
-    np.savez(wd+"/run/data_out_remote_6.npz", predictions=predictions, ground_truths=y_test, masks=masks_test) 
-
-    plt.imshow(x_test[0,:,:,0], origin = 'lower')
-    plt.title('Flagged')
-    clb = plt.colorbar()
-    plt.show()
-
-    plt.imshow(y_test[0,:,:,0], origin = 'lower')
-    plt.title('Ground Truth')
-    clb = plt.colorbar()
-    plt.show()
+    np.savez(wd+"/run/data_out_remote_final_true.npz", predictions=predictions, ground_truths=y_test, masks=masks_test) 
 
     plt.imshow(predictions[0,:,:,0], origin = 'lower')
-    plt.title('Predictions')
+    plt.title('Remote Predictions')
     clb = plt.colorbar()
-    plt.show()
+    plt.savefig('../run/figures/prediction_remote')
+    plt.close()
 
-    #misc.learning_plot(wd+'/run/log_upaint.csv', "U-Paint (learning curves)", wd+'/run/figures/upaint_learning.png', start=0)
+    misc.learning_plot(wd+'/run/log_upaint.csv', "U-Paint (learning curves)", wd+'/run/figures/upaint_learning_final.png', start=0)
