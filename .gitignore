@@ -1,7 +1,11 @@
 # Ignore all
 data/**
-checkpoints/**
+outputs/**
 run/**
-src/__pycache__
-src/tensorflow
-src/*.out
+logs/**
+scripts/__pycache__
+figures/**
+models/upaint/__pycache__
+models/upaint/checkpoints/**
+utils/__pycache__
+scripts/permutations.csv
