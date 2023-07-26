@@ -1,3 +1,16 @@
+"""
+run_usym.py
+
+Description: First tentative of implementing USYM from initial Jupyter Notebook draft
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 04-11-2022
+
+Changes:
+- 04-11-2022 Demers: Removing the second DSS block in a row in each layer of the U-Net
+"""
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger

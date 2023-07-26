@@ -1,3 +1,16 @@
+"""
+model_upaint_v2.py
+
+Description: Class implemetation of the UPAINT CNN model using DSS layers instead of convolution blocks.
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 23-12-2022
+
+Changes:
+- 26-07-2023 Demers: setting the dropout rate back to 50%
+"""
+
 import numpy as np
 import datetime
 import random

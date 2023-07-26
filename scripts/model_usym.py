@@ -1,3 +1,17 @@
+"""
+model_upaint_v2.py
+
+Description: First tentative of building USYM network following the UPAINT architecture and DSS layers
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 04-11-2022
+
+Changes:
+- 04-11-2022 Demers: Removing the second DSS block in a row in each layer of the U-Net
+"""
+
+
 from tensorflow.keras.optimizers import *
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *

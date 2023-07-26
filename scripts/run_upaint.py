@@ -87,8 +87,15 @@ UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
 
 #UPAINT_obj.model.load_weights(checkpoint_path)
 
-# Running the network
-UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 128, callbacks = [callback_list], validation_data=(x_val, y_val))
+# Setting up strategy for multi-GPU usage
+strategy=tf.distribute.MirroredStrategy()
+
+with strategy.scope():
+    # Creating a model with the CNN
+    UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
+    # Running the network
+    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 128, callbacks = [callback_list], validation_data=(x_val, y_val))
+
 print('Done, moving to predictions', flush = True)
 
 # Making predictions
