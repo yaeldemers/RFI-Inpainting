@@ -9,9 +9,6 @@ from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
 #from utils import misc as misc
 import misc
 
-#import os
-#import sys
-
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
@@ -65,8 +62,8 @@ modelcheckpoint = ModelCheckpoint(
     save_best_only=True, 
     save_weights_only = True,  
     verbose = 1, 
-    monitor = 'val_loss', 
-    period=5 # Save every 5 epochs to save diskspace
+    monitor = 'val_loss' 
+    #period=5 # Save every 5 epochs to save diskspace
     )
 
 csvlogger = CSVLogger( filename = wd+'/logs/log_upaint.csv', separator = ',' , append = False )
@@ -81,7 +78,7 @@ UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
 #UPAINT_obj.model.load_weights(checkpoint_path)
 
 # Running the network
-UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
+UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 128, callbacks = [callback_list], validation_data=(x_val, y_val))
 print('Done, moving to predictions', flush = True)
 
 # Making predictions
