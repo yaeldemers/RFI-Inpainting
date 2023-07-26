@@ -20,16 +20,20 @@ print("Still in! (AFTER input statements)")
 # Add the RFI-Inpainting directory to the Python path
 #sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-wd = '/home/ydemers/projects/def-acliu/ydemers/RFI-Inpainting'
+wd = '/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting'
 
-np.random.seed(0);
+#np.random.seed(0);
 
-data = np.load(wd+'/data/local_hera_256_data.npy') 
+data = np.load(wd+'/data/data.npy') 
 
-permutations = np.loadtxt(wd+'/scripts/permutations.csv', delimiter=',', dtype ='int')[:1]
+#permutations = np.loadtxt(wd+'/scripts/permutations.csv', delimiter=',', dtype ='int')[:1]
+print('Data is loaded')
+print(data.shape)
+print('starting data processing')
 
 masked_data= misc.create_masked_data(data, mask_width=10, num_masks=4)
 
+"""
 for i in range(len(permutations)):
 
     print()
@@ -42,39 +46,46 @@ for i in range(len(permutations)):
         masked_data['masks'],
         permutations[i]
         ) 
+"""
+
+x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices = misc.split_dataset(
+    masked_data['masked_data'], 
+    masked_data['unmasked_data'], 
+    masked_data['masks']
+    ) 
 
     #with open(wd+'/run/indices.csv','a') as f:
     #    np.savetxt(f, indices.reshape(1, -1), fmt='%i', delimiter=",")
 
-    # Creating path where network progress is saved
-    checkpoint_path = wd+'/models/upaint/checkpoints/log_upaint.hdf5'
+# Creating path where network progress is saved
+checkpoint_path = wd+'/models/upaint/checkpoints/latest_upaint.hdf5'
 
-    #TODO: Check whether or not I am replacing or appending the checkpoints
-    modelcheckpoint = ModelCheckpoint(
-        filepath = checkpoint_path, 
-        save_best_only=True, 
-        save_weights_only = True,  
-        verbose = 1, 
-        monitor = 'val_loss', 
-        period=5 # Save every 5 epochs to save diskspace
-        )
-    csvlogger = CSVLogger( filename = wd+'/logs/log_upaint.csv', separator = ',' , append = False )
-    callback_list  = [modelcheckpoint , csvlogger]
+modelcheckpoint = ModelCheckpoint(
+    filepath = checkpoint_path, 
+    save_best_only=True, 
+    save_weights_only = True,  
+    verbose = 1, 
+    monitor = 'val_loss', 
+    period=5 # Save every 5 epochs to save diskspace
+    )
 
-    # Creating an instance of the loss class
-    loss = misc.custom_loss()
+csvlogger = CSVLogger( filename = wd+'/logs/log_upaint.csv', separator = ',' , append = False )
+callback_list  = [modelcheckpoint , csvlogger]
 
-    # Creating a model with the CNN
-    UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
+# Creating an instance of the loss class
+loss = misc.custom_loss()
 
-    #UPAINT_obj.model.load_weights(checkpoint_path)
+# Creating a model with the CNN
+UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
 
-    # Running the network
-    UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 96, callbacks = [callback_list], validation_data=(x_val, y_val))
-    print('Done, moving to predictions', flush = True)
+#UPAINT_obj.model.load_weights(checkpoint_path)
 
-    # Making predictions
-    """
+# Running the network
+UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
+print('Done, moving to predictions', flush = True)
+
+# Making predictions
+"""
     ##############################
     model_path = wd+'/checkpoints/test_upaint.hdf5'
 
@@ -83,15 +94,16 @@ for i in range(len(permutations)):
     model.model.load_weights(model_path)    
     predictions = model.model.predict(x_test[:, :, :, :])
     ##############################
-    """
-    predictions = UPAINT_obj.model.predict(x_test[:, :, :, :])
+"""
 
-    np.savez(wd+'/outputs/data_out_remote_final_true.npz', predictions=predictions, ground_truths=y_test, masks=masks_test) 
+predictions = UPAINT_obj.model.predict(x_test[:, :, :, :])
 
-    plt.imshow(predictions[0,:,:,0], origin = 'lower')
-    plt.title('Remote Predictions')
-    clb = plt.colorbar()
-    plt.savefig(wd+'/figures/prediction_remote')
-    plt.close()
+np.savez(wd+'/outputs/data_out_remote_final_true.npz', predictions=predictions, ground_truths=y_test, masks=masks_test) 
 
-    misc.learning_plot(wd+'/logs/log_upaint.csv', 'U-Paint (learning curves)', wd+'/figures/upaint_learning_final.png', start=0)
+plt.imshow(predictions[0,:,:,0], origin = 'lower')
+plt.title('Remote Predictions')
+clb = plt.colorbar()
+plt.savefig(wd+'/figures/prediction_remote')
+plt.close()
+
+misc.learning_plot(wd+'/logs/log_upaint.csv', 'U-Paint (learning curves)', wd+'/figures/upaint_learning_final.png', start=0)
