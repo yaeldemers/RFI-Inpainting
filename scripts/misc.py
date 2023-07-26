@@ -1,3 +1,16 @@
+"""
+misc.py
+
+Description: Collection of classes and helper functions used throughout this project
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 26-07-2023
+
+Changes:
+- 26-07-2023 Demers: Modifying slice_data() to account for dataset with more than one image
+"""
+
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
@@ -44,28 +57,33 @@ def unnormalize(data, mean, std):
     return (data*std+mean) 
 
 def splice_data(size, location_from, location_to):
-    count_y = int(np.floor(1920/size))
-    count_x = int(np.floor(1024/size))
+    data_in = np.load(location_from)
     
-    data_in = np.load(location_from)[:size*count_y,:size*count_x]
+    shape = data_in.shape
+    
+    count_y = int(np.floor(shape[1]/size))
+    count_x = int(np.floor(shape[2]/size))
+    
+    data_in = data_in[:,:size*count_y,:size*count_x]
     data_out = []
     
-    for i in range(count_x):
-        for j in range(count_y):
+    for i in range(shape[0]):
+        for j in range(count_x):
+            for k in range(count_y):
             
-            curr=np.zeros(shape=(size, size, 3))
+                curr=np.zeros(shape=(size, size, 3))
     
-            real = np.real([data_in[j*size:(j+1)*size, i*size:(i+1)*size]])
-            imaginary = np.imag([data_in[j*size:(j+1)*size, i*size:(i+1)*size]])
-
-            curr[:,:,0] = real
-            curr[:,:,1] = imaginary
-
-            data_out.append(curr)
+                real = np.real([data_in[i, k*size:(k+1)*size, j*size:(j+1)*size]])
+                imaginary = np.imag([data_in[i, k*size:(k+1)*size, j*size:(j+1)*size]])
             
-            #plt.figure(figsize = (10,10))
-            #plt.imshow(curr, origin = 'lower')
-            #plt.colorbar()
+                curr[:,:,0] = real
+                curr[:,:,1] = imaginary
+
+                data_out.append(curr)
+            
+                plt.figure(figsize = (10,10))
+                plt.imshow(curr, origin = 'lower')
+                plt.colorbar()
             
             
     #print(data_out)

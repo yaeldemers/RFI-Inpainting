@@ -1,5 +1,15 @@
-print("I'm in! (BEFORE input statements)")
+"""
+run_upaint.py
 
+Description: Main script of the project. Responsible data processing, training and predictions
+
+Authors: Michael Pagano, Yael-Jeremy Demers
+
+Last Modified: 26-07-2023
+
+Changes:
+- 26-07-2023 Demers: Setting up script for 512x512 dataset
+"""
 import numpy as np
 #from models.upaint import model_upaint as UPAINT
 import model_upaint as UPAINT

@@ -1,3 +1,16 @@
+"""
+run_usym.py
+
+Description: Modification of the main script of the project. Responsible data processing, training and predictions of the USYM model
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 26-07-2023
+
+Changes:
+- 25-11-2022 Demers: Setting up script for final (fall 2022) predictions
+"""
+
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *

@@ -1,3 +1,16 @@
+"""
+model_upaint.py
+
+Description: Class implemetation of the UPAINT CNN model using Keras subclassing. The model follows a U-Net architecture.
+
+Authors: Michael Pagano, Yael-Jeremy Demers
+
+Last Modified: 26-07-2023
+
+Changes:
+- 26-07-2023 Demers: setting the dropout rate back to 50%
+"""
+
 import numpy as np
 import datetime
 import random
@@ -117,14 +130,14 @@ class Unet:
         #--------- drop a step in the U-pattern --------#
         ConvL7 = Conv2D(512, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(convDownSample3)
         ConvL8 = Conv2D(512, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL7)
-        Dropout1 = Dropout(0)(ConvL8)
+        Dropout1 = Dropout(0.5)(ConvL8)
         convDownSample4 = Conv2D(64, 3, strides = (2,2), padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(Dropout1)
 
         #--------- drop a step in the U-pattern --------#
         #***********THIS IS THE BOTTOM OF THE U, INSTEAD OF CONV2D with STRIDE, WERE 2D TRANSPOSE WITH STRIDE
         ConvL7 = Conv2D(1024, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(convDownSample4)
         ConvL8 = Conv2D(1024, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL7)
-        Dropout2  = Dropout(0)(ConvL8)
+        Dropout2  = Dropout(0.5)(ConvL8)
         ConvUpSample1 = Conv2DTranspose(64, 2, strides = (2,2), kernel_initializer = 'he_normal' )(Dropout2)
         
         #--------- Go up a step in the U-pattern --------#

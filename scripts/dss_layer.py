@@ -1,3 +1,16 @@
+"""
+dss_layer.py
+
+Description: Implementation of Deep Set with Symmetric Elements (DSS) layer
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 25-11-2022
+
+Changes:
+- 25-11-2022 Demers: Setting up class initialization
+"""
+
 from tensorflow.keras.layers import Conv2D, Add
 from tensorflow import keras
 
