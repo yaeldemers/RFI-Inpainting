@@ -2,7 +2,7 @@
 #SBATCH --gres=gpu:v100l:2   # request GPU "generic resource"
 #SBATCH --cpus-per-task=1    # maximum CPU cores per GPU request: 6 on Cedar, 16 on Graham.
 #SBATCH --mem=100GB          # memory per node -> optimally 250GB
-#SBATCH --time=00-03:00      # time (DD-HH:MM) -> optimally 00-03:00
+#SBATCH --time=00-01:30      # time (DD-HH:MM) -> optimally 00-03:00
 #SBATCH --account=def-acliu
 #SBATCH --output=/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting/outputs/slurm/UPAINT-%N-%j.out  # %N for node name, %j for jobID
 #SBATCH --mail-user=yael.demers@mail.mcgill.ca
