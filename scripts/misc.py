@@ -156,10 +156,10 @@ def create_masked_data(data, mask_width=10, num_masks=1):
 
     # Randomly select mask locations
     height, width = data.shape[1:3]
-    #mask_indices = np.random.randint(low=0, high=width-mask_width, size=(len(data), num_masks))
+    mask_indices = np.random.randint(low=0, high=width-mask_width, size=(len(data), num_masks))
     
-    increment = 20
-    mask_indices = np.arange(0, num_masks*increment, increment)
+    #increment = 20
+    #mask_indices = np.arange(0, num_masks*increment, increment)
     
     #print(mask_indices)
     
@@ -170,10 +170,10 @@ def create_masked_data(data, mask_width=10, num_masks=1):
         mask = np.ones((height, width)).astype(int)
         inverse_mask = np.zeros((height, width)).astype(int)
         for j in range(num_masks):
-            #mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 0
-            #inverse_mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 1
-            mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 0
-            inverse_mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 1
+            mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 0
+            inverse_mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 1
+            #mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 0
+            #inverse_mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 1
         masks.append(mask)
         inverse_masks.append(inverse_mask)
         

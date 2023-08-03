@@ -45,7 +45,7 @@ x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_te
     ) 
 
 # Creating path where network progress is saved
-checkpoint_path = wd+'/models/upaint/checkpoints/latest_upaint.hdf5'
+checkpoint_path = wd+'/checkpoints/latest_upaint.hdf5'
 
 modelcheckpoint = ModelCheckpoint(
     filepath = checkpoint_path, 
@@ -80,7 +80,7 @@ if gpus:
             # Uncomment below if loading previously trained model. Note that the current bash file deletes previous checkpoints.
             #UPAINT_obj.model.load_weights(checkpoint_path)
 
-            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 128, callbacks = [callback_list], validation_data=(x_val, y_val))
+            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
 
     except RuntimeError as e:
         print(e)
