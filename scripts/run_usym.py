@@ -20,7 +20,7 @@ from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Add, Dense
 from tensorflow import keras
 from tensorflow.keras.optimizers import *
 from dss_layer import DSS
-from misc import prediction_plot, learning_plot, custom_loss
+from utils import prediction_plot, learning_plot, custom_loss
     
 #--------- Getting input, noise for now --------#
 input_a = Input(np.random.normal(0, 1, size = (128, 128, 3)).shape, name="input_a")

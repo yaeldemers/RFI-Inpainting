@@ -12,8 +12,6 @@ Changes:
 """
 
 import numpy as np
-import datetime
-import random
 import tensorflow as tf
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
@@ -61,7 +59,7 @@ class Unet:
         convDownSample1 = Conv2D(64, 3, strides = (2,2), padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(avg1)
         #--------- drop a step in the U-pattern --------#
         
-        # half the image size, double this channels because why the fuck not
+        # half the image size, double this channels
         ConvL3 = Conv2D(128, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(convDownSample1)
         ConvL4 = Conv2D(128, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL3)
         convDownSample2 = Conv2D(64, 3, strides = (2,2), padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL4)

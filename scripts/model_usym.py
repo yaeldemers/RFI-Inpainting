@@ -11,7 +11,6 @@ Changes:
 - 04-11-2022 Demers: Removing the second DSS block in a row in each layer of the U-Net
 """
 
-
 from tensorflow.keras.optimizers import *
 from tensorflow.keras.models import *
 from tensorflow.keras.layers import *

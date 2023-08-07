@@ -5,40 +5,33 @@ Description: Main script of the project. Responsible data processing, training a
 
 Authors: Michael Pagano, Yael-Jeremy Demers
 
-Last Modified: 26-07-2023
+Last Modified: 03-08-2023
 
 Changes:
+- 03-08-2023 Demers: Implementing parameters setup from bash file
 - 28-07-2023 Demers: Setting up multi-GPU strategy and file cleanup
 - 26-07-2023 Demers: Setting up script for 512x512 dataset
 """
 
 import numpy as np
-#from models.upaint import model_upaint as UPAINT
-import model_upaint as UPAINT
-#import model_upaint_v2 as UPAINT2
-import matplotlib.pyplot as plt
+#import model_upaint as UPAINT
+import model_upaint_v2 as UPAINT2
+#import matplotlib.pyplot as plt
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
-#from utils import misc as misc
-import misc
+from utils import learning_plot, prediction_plot, create_masked_data, split_dataset, custom_loss
 
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-
-# Add the RFI-Inpainting directory to the Python path
-#sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 wd = '/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting'
 
 data = np.load(wd+'/data/data.npy') 
 
 #permutations = np.loadtxt(wd+'/scripts/permutations.csv', delimiter=',', dtype ='int')[:1]
-print('Data is loaded')
-print(data.shape)
-print('starting data processing')
 
-masked_data= misc.create_masked_data(data, mask_width=10, num_masks=4)
+masked_data = create_masked_data(data, mask_width=5, num_masks=5)
 
-x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices = misc.split_dataset(
+x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices = split_dataset(
     masked_data['masked_data'], 
     masked_data['unmasked_data'], 
     masked_data['masks']
@@ -49,7 +42,7 @@ checkpoint_path = wd+'/checkpoints/latest_upaint.hdf5'
 
 modelcheckpoint = ModelCheckpoint(
     filepath = checkpoint_path, 
-    save_best_only=True, 
+    save_best_only = True, 
     save_weights_only = True,  
     verbose = 1, 
     monitor = 'val_loss' 
@@ -60,7 +53,7 @@ csvlogger = CSVLogger( filename = wd+'/logs/log_upaint.csv', separator = ',' , a
 callback_list  = [modelcheckpoint , csvlogger]
 
 # Creating an instance of the loss class
-loss = misc.custom_loss()
+loss = custom_loss()
 
 # Request all available GPUs
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -75,12 +68,12 @@ if gpus:
 
         # Now define and compile model within the strategy's scope
         with strategy.scope():
-            UPAINT_obj = UPAINT.Unet(data[1,:,:].shape, loss, checkpoint_path)
+            UPAINT_obj = UPAINT2.Unet(data[1,:,:].shape, loss, checkpoint_path)
 
             # Uncomment below if loading previously trained model. Note that the current bash file deletes previous checkpoints.
-            #UPAINT_obj.model.load_weights(checkpoint_path)
+            # UPAINT_obj.model.load_weights(checkpoint_path)
 
-            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
+            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 300, callbacks = [callback_list], validation_data=(x_val, y_val))
 
     except RuntimeError as e:
         print(e)
@@ -91,10 +84,12 @@ predictions = UPAINT_obj.model.predict(x_test[:, :, :, :])
 
 np.savez(wd+'/outputs/upaint_data_out.npz', predictions=predictions, ground_truths=y_test, masks=masks_test) 
 
-plt.imshow(predictions[0,:,:,0], origin = 'lower')
-plt.title('Remote Predictions Sample')
-clb = plt.colorbar()
-plt.savefig(wd+'/figures/prediction_remote')
-plt.close()
+#plt.imshow(predictions[0,:,:,0], origin = 'lower')
+#plt.title('Remote Predictions Sample')
+#clb = plt.colorbar()
+#plt.savefig(wd+'/figures/prediction_remote')
+#plt.close()
 
-misc.learning_plot(wd+'/logs/log_upaint.csv', 'U-Paint (learning curves)', wd+'/figures/upaint_learning_final.png', start=1)
+prediction_plot(predictions[0,:,:,0], "Remote Prediction Sample", wd+'/figures/prediction_remote')
+
+learning_plot(wd+'/logs/log_upaint.csv', 'U-Paint (learning curves)', wd+'/figures/upaint_learning_final.png', start=1)

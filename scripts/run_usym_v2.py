@@ -15,7 +15,7 @@ from tensorflow.keras.models import *
 from tensorflow.keras.layers import *
 from tensorflow.keras.optimizers import *
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger
-from misc import prediction_plot, learning_plot, custom_loss 
+from scripts.utils import prediction_plot, learning_plot, custom_loss 
 from model_usym import USYM
 import numpy as np
 
