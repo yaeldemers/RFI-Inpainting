@@ -1,11 +1,6 @@
-# Ignore all
+# Ignore the following
 data/**
-outputs/**
-run/**
-logs/**
-scripts/__pycache__
 figures/**
-models/upaint/__pycache__
-models/upaint/checkpoints/**
-utils/__pycache__
-scripts/permutations.csv
+logs/**
+outputs/**
+scripts/__pycache__

@@ -73,7 +73,7 @@ if gpus:
             # Uncomment below if loading previously trained model. Note that the current bash file deletes previous checkpoints.
             # UPAINT_obj.model.load_weights(checkpoint_path)
 
-            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 300, callbacks = [callback_list], validation_data=(x_val, y_val))
+            UPAINT_obj.model.fit(x_train, y_train, batch_size = 4, epochs = 256, callbacks = [callback_list], validation_data=(x_val, y_val))
 
     except RuntimeError as e:
         print(e)
