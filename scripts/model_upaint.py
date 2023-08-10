@@ -189,7 +189,7 @@ class Unet:
             except:
                 pass
                 print('No weights to load' , flush = True)
-            #self.model.load_weights(self.weights)​
+                
         self.model.compile(optimizer = Adam(learning_rate = 1e-4), loss = masked_loss , metrics = [ masked_loss ])
 
         #self.model.summary()​​​​

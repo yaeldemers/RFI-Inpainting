@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --gres=gpu:v100l:2   # request GPU -> v100l is a cluster with sufficient GPU RAM
-#SBATCH --cpus-per-task=1    # maximum CPU cores per GPU request: 6 on Cedar, 16 on Graham.
+#SBATCH --cpus-per-task=1    # maximum CPU cores per GPU request: 6 on Cedar, 16 on Graham
 #SBATCH --mem=100GB          # memory per node, v100l can provide at most 100GB
 #SBATCH --time=00-01:30      # time (DD-HH:MM)
 #SBATCH --account=def-acliu
-#SBATCH --output=/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting/outputs/slurm/UPAINT-%N-%j.out  # %N for node name, %j for jobID
+#SBATCH --output=/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting/outputs/slurm/UPAINT-%j.out  # %N for node name, %j for jobID
 #SBATCH --mail-user=yael.demers@mail.mcgill.ca
 #SBATCH --mail-type=ALL
 
