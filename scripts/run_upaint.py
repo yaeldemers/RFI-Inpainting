@@ -26,10 +26,10 @@ from tensorflow.keras.models import load_model
 wd = '/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting'
 
 data = np.load(wd+'/data/data.npy') 
+#flags = np.load(wd+'/data/flags.npy')
 
-#permutations = np.loadtxt(wd+'/scripts/permutations.csv', delimiter=',', dtype ='int')[:1]
-
-masked_data = create_masked_data(data, mask_width=5, num_masks=5)
+masked_data = create_masked_data(data, mask_width=5, num_masks=4)
+#masked_data = create_masked_data(data, masks=flags)
 
 x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices = split_dataset(
     masked_data['masked_data'], 

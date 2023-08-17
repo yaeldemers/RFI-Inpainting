@@ -1,4 +1,5 @@
 # Ignore the following
+checkpoints/**
 data/**
 figures/**
 logs/**

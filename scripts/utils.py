@@ -126,7 +126,7 @@ class custom_loss:
             
         return masked_loss
 
-def create_masked_data(data, mask_width=10, num_masks=1):
+def create_masked_data(data, mask_width=10, num_masks=1, masks=[]):
     """
     Apply masks to the input data to simulate missing or corrupted data.
 
@@ -151,32 +151,45 @@ def create_masked_data(data, mask_width=10, num_masks=1):
     # Normalize each image separately, excluding third channel
     data_masked[:, :, :, 0:2] = (data_masked[:, :, :, 0:2] - means[:, :, :, 0:2]) / std_devs[:, :, :, 0:2]
 
-    # Randomly select mask locations
-    height, width = data.shape[1:3]
-    mask_indices = np.random.randint(low=0, high=width-mask_width, size=(len(data), num_masks))
+    # This if-else ladder generates flags if not provided. Should be removed down the line when more flag options are provided.
+    if len(masks)==0:
     
-    #increment = 20
-    #mask_indices = np.arange(0, num_masks*increment, increment)
+        height, width = data.shape[1:3]
         
-    # Create masks
-    masks = []
-    inverse_masks = []
-    for i in range(len(data)):
-        mask = np.ones((height, width)).astype(int)
-        inverse_mask = np.zeros((height, width)).astype(int)
-        for j in range(num_masks):
-            mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 0
-            inverse_mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 1
-            #mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 0
-            #inverse_mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 1
-        masks.append(mask)
-        inverse_masks.append(inverse_mask)
+        # Randomly select mask locations
+        #mask_indices = np.random.randint(low=0, high=width-mask_width, size=(len(data), num_masks))
+    
+        # Alternatively, setup static mask locations
+        increment = 50
+        mask_indices = np.arange(50, num_masks*increment, increment)
         
-    masks, inverse_masks = np.array(masks), np.array(inverse_masks)
+        # Create masks
+        masks = []
+        inverse_masks = []
+        
+        for i in range(len(data)):
+            mask = np.ones((height, width)).astype(int)
+            inverse_mask = np.zeros((height, width)).astype(int)
+            for j in range(num_masks):
+                # Uncomment if using random flags
+                #mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 0
+                #inverse_mask[:, mask_indices[i,j]:mask_indices[i,j]+mask_width] = 1
+                
+                # Uncomment if using static flags
+                mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 0
+                inverse_mask[:, mask_indices[j]:mask_indices[j] + mask_width] = 1
+            
+            masks.append(mask)
+            inverse_masks.append(inverse_mask)
+        masks, inverse_masks = np.array(masks), np.array(inverse_masks)
+    
+    else:
+        inverse_masks = masks.copy().astype(int)
+        masks = np.logical_not(masks).astype(int)
     
     # Apply masks
     data_not_masked = data.copy() # labels
-    
+
     data_masked[:,:,:,0] = data_masked[:,:,:,0] * masks
     data_masked[:,:,:,1] = data_masked[:,:,:,1] * masks
     data_masked[:,:,:,2] = inverse_masks
