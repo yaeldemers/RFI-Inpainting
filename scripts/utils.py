@@ -5,10 +5,11 @@ Description: Collection of classes and helper functions used throughout this pro
 
 Authors: Yael-Jeremy Demers
 
-Last Modified: 26-07-2023
+Last Modified: 14-08-2023
 
 Changes:
-- 26-07-2023 Demers: Modifying slice_data() to account for dataset with more than one image
+- 14-08-2023 Demers: Added the option of using existing HERA flags with create_masked_data()
+- 26-07-2023 Demers: Modifying slice_data() to account for dataset with more than one images
 """
 
 import tensorflow as tf

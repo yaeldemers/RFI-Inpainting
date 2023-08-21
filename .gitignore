@@ -5,3 +5,5 @@ figures/**
 logs/**
 outputs/**
 scripts/__pycache__
+scripts/run_test.py 
+test_pipeline.sh
