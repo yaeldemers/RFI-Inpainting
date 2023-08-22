@@ -8,8 +8,7 @@ Authors: Yael-Jeremy Demers
 Last Modified: 23-12-2022
 
 Changes:
-- 18-08-2023 Demers: Switching Average layers to custom Fully Connected layers.
-- 26-07-2023 Demers: Setting the dropout rate back to 50%
+- 26-07-2023 Demers: setting the dropout rate back to 50%
 """
 
 import numpy as np
@@ -53,7 +52,7 @@ class Unet:
         #ConvL1 = Conv2D(64, 3, padding= 'same', activation = 'relu', kernel_initializer = 'he_normal' )(input_layer)
         #ConvL2 = Conv2D(64, 3, padding = 'same',  activation = 'relu', kernel_initializer = 'he_normal')(ConvL1)
         #print('ConvL2' , tf.shape(ConvL2))
-        
+        # Normally Convolution blocks have 2 Conv2D layers but since we have two in DSS's, we only need one DSS here
         dss_1 = DSS(filters=64, name="dss_1-1")([input_layer, input_layer])
         
         fc_1 = CustomFullyConnectedLayer(units=64, activation='relu')(dss_1)

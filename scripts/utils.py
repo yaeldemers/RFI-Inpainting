@@ -160,9 +160,9 @@ def create_masked_data(data, mask_width=10, num_masks=1, masks=[]):
         # Randomly select mask locations
         #mask_indices = np.random.randint(low=0, high=width-mask_width, size=(len(data), num_masks))
     
-        # Alternatively, setup static mask locations
+        # Alternatively, uncomment to setup static mask locations
         increment = 50
-        mask_indices = np.arange(50, num_masks*increment, increment)
+        mask_indices = np.arange(0, num_masks*increment, increment) + increment
         
         # Create masks
         masks = []
