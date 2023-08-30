@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres=gpu:v100l:2   # request GPU -> v100l is a cluster with sufficient GPU RAM, 2 -> needs to be a divider of batch size
+#SBATCH --gres=gpu:v100l:2   # request GPUs -> v100l is a cluster with sufficient GPU RAM, 2 GPUs -> needs to be a divider of batch size
 #SBATCH --cpus-per-task=1    # maximum CPU cores per GPU request: 6 on Cedar, 16 on Graham
 #SBATCH --mem=100GB          # memory per node, v100l can provide at most 100GB
 #SBATCH --time=00-03:00      # time (DD-HH:MM)

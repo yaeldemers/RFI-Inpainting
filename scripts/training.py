@@ -17,7 +17,7 @@ Changes:
 import argparse
 import numpy as np
 import model_upaint as UPAINT
-import model_upaint_v2 as UPAINT2
+import model_upaint_v3 as UPAINT2
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
 from utils import learning_plot, prediction_plot, create_masked_data, split_dataset, custom_loss
 

@@ -142,7 +142,7 @@ class Unet:
         # concatenate along the channel direction
         # add a layer before the concatenation to make sure they are the same size
         ConvL9 = Conv2D(512, 2, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal' )(ConvUpSample1)
-        Merge1 = concatenate( [Dropout1,ConvL9], axis = 3)
+        Merge1 = concatenate([Dropout1,ConvL9], axis = 3)
     
         #After concatenation, go back to using the same channel direction
         ConvL10 = Conv2D(512, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal' )(Merge1)
