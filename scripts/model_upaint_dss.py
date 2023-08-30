@@ -96,9 +96,6 @@ class Unet:
         Merge1 = concatenate( [Dropout1,ConvL9], axis = 3)
     
         #After concatenation, go back to using the same channel direction
-        #ConvL10 = Conv2D(512, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal' )(Merge1)
-        #ConvL11 = Conv2D(512, 3, padding = 'same', activation = 'relu' , kernel_initializer = 'he_normal')(ConvL10)
-
         dss_4_up = DSS(filters=512, name="dss_4-1-up")([Merge1, Merge1])
         fc_4_up = CustomFullyConnectedLayer(units=512, activation='relu')(dss_4_up)        
         
@@ -106,9 +103,6 @@ class Unet:
         ConvUpSample2 = Conv2DTranspose(64, 2, strides = (2,2))(fc_4_up)
         ConvL12 = Conv2D(256, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvUpSample2)
         Merge2 = concatenate([fc_3, ConvL12], axis = 3)
-        #ConvL13 = Conv2D(256, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(Merge2)
-        #ConvL14 = Conv2D(256, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL13)
-        
         dss_3_up = DSS(filters=256, name="dss_3-1-up")([Merge2, Merge2])
         fc_3_up = CustomFullyConnectedLayer(units=256, activation='relu')(dss_3_up)
 
@@ -116,9 +110,6 @@ class Unet:
         ConvUpSample3 = Conv2DTranspose(64, 2, strides = (2,2), padding = 'same')(fc_3_up)
         ConvL15 = Conv2D(128, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvUpSample3)
         Merge3 = concatenate([fc_2, ConvL15], axis = 3)
-        #ConvL16 = Conv2D(128, 3, padding = 'same', activation = 'relu' , kernel_initializer = 'he_normal')(Merge3)
-        #ConvL17 = Conv2D(128, 3, padding = 'same', activation = 'relu' , kernel_initializer = 'he_normal')(ConvL16)
-
         dss_2_up = DSS(filters=128, name="dss_2-1-up")([Merge3, Merge3])
         fc_2_up = CustomFullyConnectedLayer(units=128, activation='relu')(dss_2_up)
 
@@ -126,9 +117,6 @@ class Unet:
         ConvUpSample4 = Conv2DTranspose(64, 3, strides = (2,2), padding = 'same')(fc_2_up)
         ConvL18 = Conv2D(64, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvUpSample4)
         Merge4 = concatenate([fc_1, ConvL18], axis = 3)
-        #ConvL19 = Conv2D(64, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(Merge4)
-        #ConvL20 = Conv2D(64, 3, padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL19)
-
         dss_1_up = DSS(filters=64, name="dss_1-1-up")([Merge4, Merge4])
         fc_1_up = CustomFullyConnectedLayer(units=64, activation='relu')(dss_1_up)
 

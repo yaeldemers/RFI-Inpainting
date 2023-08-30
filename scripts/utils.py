@@ -8,6 +8,8 @@ Authors: Yael-Jeremy Demers
 Last Modified: 14-08-2023
 
 Changes:
+- 30-08-2023 Demers: Optimized and documented current helper functions
+- 29-08-2023 Demers: Moved plotting functions into visualization notebook
 - 14-08-2023 Demers: Added the option of using existing HERA flags with create_masked_data()
 - 26-07-2023 Demers: Modifying slice_data() to account for dataset with more than one images
 """
@@ -16,48 +18,50 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 from pandas import read_csv
-
-def prediction_plot(data, title, save_at, vmax=None, vmin=None):
-    plt.imshow(data, origin = 'lower', vmax=vmax, vmin=vmin)
-    plt.title(title)
-    plt.xlabel('Frequency [MHz]')
-    plt.ylabel('$LST_0+[min]$')
-    clb = plt.colorbar()
-    clb.ax.set_title('$[Jy]/\sigma$')
-    plt.savefig(save_at)
-    plt.show()
-    plt.close()
     
-def learning_plot(logs, title, save_at, start=0, end=0):
-    data = read_csv(logs)
-
-    # converting column data to list
-    loss = data['loss'].tolist()
-    val_loss = data['val_loss'].tolist()[1:]
-    
-    if end==0:
-        end=len(loss)
-    
-    plt.plot(val_loss[start:end], label="Validation loss")
-    plt.plot(loss[start:end], label="Training loss")
-    plt.xlabel('Epoch', fontsize=15)
-    plt.ylabel('Learning curve', fontsize=15)
-    plt.legend()
-    plt.title(title)
-    plt.grid(True)
-    plt.show()
-    plt.savefig(save_at)
-    plt.close()
-
 def normalize(data):
+    """
+    Normalize the input data by subtracting the mean and dividing by the standard deviation.
+
+    Args:
+    data (np.ndarray): Input data to be normalized.
+
+    Returns:
+    np.ndarray: Normalized data.
+    float: Mean of the original data.
+    float: Standard deviation of the original data.
+    """
     mean = np.mean(data)
     std = np.std(data)
-    return [(data - mean) / std, mean, std]
+    normalized_data = (data - mean) / std
+    return normalized_data, mean, std
     
 def unnormalize(data, mean, std):
-    return (data*std+mean) 
+    """
+    Unnormalize the input data by reversing the normalization process.
+
+    Args:
+    data (np.ndarray): Normalized data to be unnormalized.
+    mean (float): Mean of the original data.
+    std (float): Standard deviation of the original data.
+
+    Returns:
+    np.ndarray: Unnormalized data.
+    """
+    return (data * std) + mean
 
 def splice_data(size, location_from, location_to):
+    """
+    Splice and rearrange data from one location to another.
+
+    Args:
+    size (int): Size of the spliced segments.
+    location_from (str): Path to the source data file.
+    location_to (str): Path to save the spliced data.
+
+    Returns:
+    None
+    """
     data_in = np.load(location_from)
     
     shape = data_in.shape
@@ -82,65 +86,82 @@ def splice_data(size, location_from, location_to):
 
                 data_out.append(curr)
             
-                plt.figure(figsize = (10,10))
-                plt.imshow(curr, origin = 'lower')
-                plt.colorbar()
+                # Commented out plotting to avoid excessive visualizations
+                # plt.figure(figsize=(10, 10))
+                # plt.imshow(curr, origin='lower')
+                # plt.colorbar()
                         
     np.save(location_to, data_out)
+
+def test_loss(Y_true, Y_pred):
+    """
+    Custom loss function that calculates the chi^2 of masked regions in predicted and ground truth visibility data.
+
+    Args:
+    Y_true (tf.Tensor): Ground truth visibility data with shape [batch_size, height, width, channels].
+    Y_pred (tf.Tensor): Predicted visibility data with shape [batch_size, height, width, channels].
+
+    Returns:
+    tf.Tensor: Loss value.
+    """
+    mask_array = Y_true[:, :, :, 2]
+
+    Y_pred_real = Y_pred[:, :, :, 0] * mask_array
+    Y_true_real = Y_true[:, :, :, 0] * mask_array
+    
+    Y_pred_imag = Y_pred[:, :, :, 1] * mask_array
+    Y_true_imag = Y_true[:, :, :, 1] * mask_array
+    
+    ground_truth_reconstructed = tf.complex(Y_true_real, Y_true_imag)
+    predictions_reconstructed = tf.complex(Y_pred_real, Y_pred_imag)
+    
+    chi = ground_truth_reconstructed - predictions_reconstructed
+    chi2 = tf.math.conj(chi) * chi
+    
+    return tf.math.reduce_sum(tf.math.real(chi2))
 
 class custom_loss:
     def wrapper(self):
 
         def masked_loss(Y_true, Y_pred):
-            
-            '''
-                This loss function takes the prediction Y_pred, applies the mask to the first two channels
-                which correspond to the real and imag part of the visibilities, then computes the 'chi^2'
-                of those two channels.
-            '''
+            """
+            Custom loss function that calculates the chi^2 of masked regions in predicted and ground truth visibility data.
 
-            '''
-            Uncomment if 0 -> flag and 1 -> not flagged
-            
-            ones = tf.ones_like(Y_true[:,:,:,2])
-            #invert the mask, we want only the masked areas to enter the chi^2
-            mask_array = ones - Y_true[:,:,:,2]
-            '''
+            Args:
+            Y_true (tf.Tensor): Ground truth visibility data with shape [batch_size, height, width, channels].
+            Y_pred (tf.Tensor): Predicted visibility data with shape [batch_size, height, width, channels].
+
+            Returns:
+            tf.Tensor: Loss value.
+            """
+            mask_array = Y_true[:, :, :, 2]
+
+            Y_pred_real = Y_pred[:, :, :, 0] * mask_array
+            Y_true_real = Y_true[:, :, :, 0] * mask_array
     
-            mask_array = Y_true[:,:,:,2]
-
-            Y_pred_real = tf.math.multiply(tf.cast(Y_pred[:,:,:,0], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
-            Y_true_real = tf.math.multiply(tf.cast(Y_true[:,:,:,0], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
-            
-            Y_pred_imag = tf.math.multiply(tf.cast(Y_pred[:,:,:,1], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
-            Y_true_imag = tf.math.multiply(tf.cast(Y_true[:,:,:,1], tf.float64), tf.cast(mask_array[:,:,:], tf.float64))
-                        
+            Y_pred_imag = Y_pred[:, :, :, 1] * mask_array
+            Y_true_imag = Y_true[:, :, :, 1] * mask_array
+    
             ground_truth_reconstructed = tf.complex(Y_true_real, Y_true_imag)
-            
             predictions_reconstructed = tf.complex(Y_pred_real, Y_pred_imag)
-                           
+    
             chi = ground_truth_reconstructed - predictions_reconstructed
-            
             chi2 = tf.math.conj(chi) * chi
-            
-            return tf.math.real(tf.math.reduce_sum(chi2))
-            
-        return masked_loss
+    
+            return tf.math.reduce_sum(tf.math.real(chi2))
 
 def create_masked_data(data, mask_width=10, num_masks=1, masks=[]):
     """
-    Apply masks to the input data to simulate missing or corrupted data.
+    Create masked and unmasked data for neural network training.
 
     Args:
-    data (np.ndarray): Input data with shape [n, 256, 256, 3] where the last dimension represents 3 different 
-    channels: real values, imaginary values, and mask location.
-    mask_width (int): Width of each mask.
-    num_masks (int): Number of masks to apply to each image.
+    data (np.ndarray): Input data with shape [n, height, width, channels].
+    mask_width (int, optional): Width of the mask to be applied. Default is 10.
+    num_masks (int, optional): Number of masks to be applied. Default is 1.
+    masks (list or np.ndarray, optional): List of pre-defined masks. Default is an empty list.
 
     Returns:
-    np.ndarray: Masked data with shape [n, 256, 256, 3].
-    np.ndarray: Unmasked data with shape [n, 256, 256, 3].à
-    np.ndarray: Masks used for each image with shape [n, 256, 256].
+    dict: A dictionary containing masked_data, unmasked_data, and masks.
     """
     
     data_masked = data.copy()
@@ -201,18 +222,38 @@ def create_masked_data(data, mask_width=10, num_masks=1, masks=[]):
                 'masks': inverse_masks.squeeze()
                 }
 
-
 def split_dataset(masked_data, unmasked_data, masks, indices=[]):
+    """
+    Split the dataset into training, validation, and testing subsets.
+
+    Args:
+    masked_data (np.ndarray): Masked data for training.
+    unmasked_data (np.ndarray): Unmasked data for labels.
+    masks (np.ndarray): Binary masks indicating masked regions.
+    indices (list or np.ndarray, optional): Indices for dataset splitting. Default is an empty list.
+
+    Returns:
+    tuple: A tuple containing training and validation data along with masks.
+           x_train (np.ndarray): Masked training data.
+           y_train (np.ndarray): Unmasked training labels.
+           masks_train (np.ndarray): Masks for training data.
+           x_val (np.ndarray): Masked validation data.
+           y_val (np.ndarray): Unmasked validation labels.
+           masks_val (np.ndarray): Masks for validation data.
+           x_test (np.ndarray): Masked testing data.
+           y_test (np.ndarray): Unmasked testing labels.
+           masks_test (np.ndarray): Masks for testing data.
+    """
     n = masked_data.shape[0]  # Number of images in the dataset
 
     # Generate random indices for sampling without replacement
-    if len(indices)==0:
+    if len(indices) == 0:
         indices = np.random.permutation(n)
 
     # Calculate the sizes of the three subsets
-    n_train = int(0.8 * 0.8 * n)
-    n_val = int(0.2 * 0.8 * n)
-    n_test = n - n_train - n_val
+    n_train = int(0.8 * 0.8 * n)  # 64% of total data
+    n_val = int(0.2 * 0.8 * n)    # 16% of total data
+    n_test = n - n_train - n_val   # Remaining 20% of total data
     subset_sizes = [n_train, n_val, n_test]
 
     # Split the indices into three subarrays based on subset sizes
@@ -223,4 +264,8 @@ def split_dataset(masked_data, unmasked_data, masks, indices=[]):
     x_val, y_val, masks_val = masked_data[sub_indices[1]], unmasked_data[sub_indices[1]], masks[sub_indices[1]]
     x_test, y_test, masks_test = masked_data[sub_indices[2]], unmasked_data[sub_indices[2]], masks[sub_indices[2]]
     
-    return x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices
+    return (
+        x_train, y_train, masks_train,
+        x_val, y_val, masks_val,
+        x_test, y_test, masks_test
+    )

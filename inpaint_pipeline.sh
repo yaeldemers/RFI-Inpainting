@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --gres=gpu:v100l:2   # request GPUs -> v100l is a cluster with sufficient GPU RAM, 2 GPUs -> needs to be a divider of batch size
 #SBATCH --cpus-per-task=1    # maximum CPU cores per GPU request: 6 on Cedar, 16 on Graham
-#SBATCH --mem=100GB          # memory per node, v100l can provide at most 100GB
-#SBATCH --time=00-03:00      # time (DD-HH:MM)
+#SBATCH --mem=25GB          # memory per node, v100l can provide at most 100GB
+#SBATCH --time=00-00:10      # time (DD-HH:MM)
 #SBATCH --account=def-acliu
 #SBATCH --output=/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting/outputs/slurm/UPAINT-%j.out  # %N for node name, %j for jobID
 #SBATCH --mail-user=yael.demers@mail.mcgill.ca
@@ -10,9 +10,9 @@
 
 # Define variables for training parameters
 DATE_TIME=$(TZ=America/New_York date)
-MODEL_PATH="checkpoints/latest_upaint_v2.hdf5"
-MODEL_TYPE="UPAINT2"
-EPOCHS=256
+MODEL_PATH="checkpoints/latest_upaint_dss.hdf5"
+MODEL_TYPE="UPAINT_DSS"
+EPOCHS=4
 BATCH_SIZE=4
 
 # Print the training parameters header to the slurm output

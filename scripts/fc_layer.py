@@ -1,3 +1,16 @@
+"""
+dss_layer.py
+
+Description: Implementation of a layer that takes two inputs, performs fully connected operations on each input, and then combines their outputs.
+
+Authors: Yael-Jeremy Demers
+
+Last Modified: 18-08-2023
+
+Changes:
+- 18-08-2023 Demers: Setting up the build() function to assign weights
+"""
+
 import tensorflow as tf
 
 class CustomFullyConnectedLayer(tf.keras.layers.Layer):

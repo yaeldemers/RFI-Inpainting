@@ -91,7 +91,7 @@ class Unet:
         # we need the loss for the compile step, this is just the object though, we'll initialize the
         # actual loss function (which is wrapped) later on
         masked_loss  = loss_class.wrapper()
-        # TODO fix above
+        
         #masked_loss = loss_class
 
         self.weights_dir = weights_dir
@@ -108,7 +108,6 @@ class Unet:
         # ask Jing whether the kernel initializer makes much of a difference
         ConvL1 = Conv2D(64, 3, padding= 'same', activation = 'relu', kernel_initializer = 'he_normal' )(input_layer)
         ConvL2 = Conv2D(64, 3, padding = 'same',  activation = 'relu', kernel_initializer = 'he_normal')(ConvL1)
-        #print('ConvL2' , tf.shape(ConvL2))
         keras.backend.shape(ConvL2)
         # this is not a conv transpose, just another layer but this time has different output, we can initialize this without issue
         convDownSample1 = Conv2D(64, 3, strides = (2,2), padding = 'same', activation = 'relu', kernel_initializer = 'he_normal')(ConvL2)

@@ -17,14 +17,14 @@ Changes:
 import argparse
 import numpy as np
 import model_upaint as UPAINT
-import model_upaint_v3 as UPAINT2
+import scripts.model_upaint_dss as UPAINT_DSS
 from tensorflow.keras.callbacks import ModelCheckpoint, CSVLogger, EarlyStopping
-from utils import learning_plot, prediction_plot, create_masked_data, split_dataset, custom_loss
+from utils import learning_plot, prediction_plot, create_masked_data, split_dataset, custom_loss, test_loss
 
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 
-def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UPAINT', epochs = 96, batch_size = 4):
+def train_upaint(model_path = 'checkpoints/latest_upaint.hdf5', model_type = 'UPAINT', epochs = 96, batch_size = 4):
 
     wd = '/home/ydemers/projects/rrg-acliu/ydemers/RFI-Inpainting'
 
@@ -34,14 +34,11 @@ def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UP
     masked_data = create_masked_data(data, mask_width = 5, num_masks = 4)
     #masked_data = create_masked_data(data, masks = flags)
 
-    x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test, indices = split_dataset(
+    x_train, y_train, masks_train, x_val, y_val, masks_val, x_test, y_test, masks_test = split_dataset(
         masked_data['masked_data'], 
         masked_data['unmasked_data'], 
         masked_data['masks']
         ) 
-
-    # Creating path where network progress is saved
-    #checkpoint_path = wd + '/checkpoints/latest_upaint.hdf5'
 
     modelcheckpoint = ModelCheckpoint(
         filepath = model_path, 
@@ -57,7 +54,8 @@ def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UP
     callback_list  = [earlystopping, modelcheckpoint, csvlogger]
 
     # Creating an instance of the loss class
-    loss = custom_loss()
+    #loss = custom_loss()
+    loss = test_loss
 
     # Request all available GPUs
     gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -72,12 +70,12 @@ def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UP
 
             # Now define and compile model within the strategy's scope
             with strategy.scope():
-                if model_type == "UPAINT":
+                if model_type == 'UPAINT':
                     model_constructor = UPAINT.Unet
-                elif model_type == "UPAINT2":
-                    model_constructor = UPAINT2.Unet
+                elif model_type == 'UPAINT2_DSS':
+                    model_constructor = UPAINT_DSS.Unet
                 else:
-                    raise ValueError("Invalid model_type. Use 'UPAINT' or 'UPAINT2'.")
+                    raise ValueError("Invalid model_type. Use 'UPAINT' or 'UPAINT_DSS'.")
 
                 UPAINT_obj = model_constructor(data[1,:,:].shape, loss, model_path)
 
@@ -90,12 +88,12 @@ def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UP
             print(e)
 
     else:
-        if model_type == "UPAINT":
+        if model_type == 'UPAINT':
             model_constructor = UPAINT.Unet
-        elif model_type == "UPAINT2":
-            model_constructor = UPAINT2.Unet
+        elif model_type == 'UPAINT_DSS':
+            model_constructor = UPAINT_DSS.Unet
         else:
-            raise ValueError("Invalid model_type. Use 'UPAINT' or 'UPAINT2'.")
+            raise ValueError("Invalid model_type. Use 'UPAINT' or 'UPAINT_DSS'.")
 
         UPAINT_obj = model_constructor(data[1,:,:].shape, loss, model_path)
 
@@ -114,7 +112,7 @@ def train_upaint(model_path = "checkpoints/latest_upaint.hdf5", model_type = 'UP
 
     print('time to plot...')
 
-    prediction_plot(predictions[0,:,:,0], "Remote Prediction Sample", wd + '/figures/prediction_remote_test')
+    prediction_plot(predictions[0,:,:,0], 'Remote Prediction Sample', wd + '/figures/prediction_remote_test')
 
     learning_plot(wd + '/logs/log_' + model_type + '.csv', 'U-Paint (learning curves)', wd + '/figures/upaint_learning_final_test.png', start = 1)
 
